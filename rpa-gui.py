@@ -87,11 +87,6 @@ class CertidaoApp(QWidget):
         if not self.validateCPF(cpf):
             QMessageBox.warning(self, 'Erro', 'CPF inválido!')
         else:
-            # QMessageBox.information(self, 'Solicitação Recebida',
-            #                         f'Nome do Empreendimento: {nome_empreendimento}\n'
-            #                         f'Nome do Proprietário: {nome_proprietario}\n'
-            #                         f'CPF: {cpf}\n'
-            #                         f'Tipo de Certidão: {tipo_certidao}')
             self.startAutomation(cpf)
 
     def validateCPF(self, cpf):
@@ -112,11 +107,12 @@ class CertidaoApp(QWidget):
         self.select_certificate_type()
         self.select_region()
         self.enter_cpf(cpf)
-        self.baixa_certidao()
+        self.baixa_certidao(cpf)
         
     def open_browser_and_navigate(self, url):
         """Abre o navegador e navega para a URL especificada."""
         # rpa.press('winleft')
+        time.sleep(1)
         rpa.press('win')
         time.sleep(0.5)
         rpa.write("chrome")
@@ -173,24 +169,39 @@ class CertidaoApp(QWidget):
         rpa.press('enter')
         
     def baixa_certidao(self, cpf):
+        """Baixa e salva o arquivo."""
         time.sleep(1)
-        rpa.press('tab')
+        rpa.moveTo(684,197)  # Ajustar de acordo com a tela 
+        rpa.sleep(0.5)
+        rpa.click()
         time.sleep(0.5)
-        rpa.press('enter')
-        for _ in range(8):
-            rpa.press('tab')
+        # baixar arquivo ( x 1260 y 114)
+        rpa.moveTo(1260,114)  # Ajustar de acordo com a tela 
+        rpa.sleep(0.5)
+        rpa.click()
+        # salvar arquivo 
         time.sleep(1)
-        rpa.press('space')
+        # rpa.write(cpf + '-awp', interval=0.1)
         
-        # Salva o doc 
-        # C:\Users\Juca\Desktop\qb
-        for _ in range(5):
-            rpa.press('tab')
-        time.sleep(1)
-        rpa.press('space')
-        time.sleep(0.5)
-        rpa.press('enter')
+        tipo_certidao = self.certidao_combo.currentText()
         
+        if ( tipo_certidao == 'Cível'):
+            rpa.write(cpf + '-civel', interval=0.1)
+            rpa.press('enter')
+            rpa.sleep(0.5)
+            rpa.alert(text="Certidão Judicial Cível Salva!", title="Processo finalizado")
+        elif (tipo_certidao == 'Criminal'):
+            rpa.write(cpf + '-criminal', interval=0.1)
+            rpa.press('enter')
+            rpa.sleep(0.5)
+            rpa.alert(text="Certidão Judicial Criminal Salva!", title="Processo finalizado")
+        else:
+            rpa.write(cpf + '-eleitoral', interval=0.1)
+            rpa.press('enter')
+            rpa.sleep(0.5)
+            rpa.alert(text="Certidão Eleitoral  Salva!", title="Processo finalizado")
+
+        # Button ( x: 684 y:197 )
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
